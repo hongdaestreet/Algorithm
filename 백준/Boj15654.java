@@ -13,7 +13,7 @@ public class Main {
 	static int N;
 	static boolean[] visited;
 	static StringBuilder sb;
-	
+
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
@@ -23,7 +23,7 @@ public class Main {
 		selected = new int[N];
 		visited = new boolean[N];
 		StringTokenizer st1 = new StringTokenizer(br.readLine());
-		for(int i=0;i<N;i++) {
+		for (int i = 0; i < N; i++) {
 			arr[i] = Integer.parseInt(st1.nextToken());
 		}
 		sb = new StringBuilder();
@@ -31,25 +31,24 @@ public class Main {
 		dfs(0);
 		System.out.println(sb);
 	}
-	
+
 	static void dfs(int depth) {
 		if (depth == M) {
-			for(int i=0;i<M;i++) {
+			for (int i = 0; i < M; i++) {
 				sb.append(selected[i]).append(" ");
 			}
 			sb.append("\n");
 			return;
 		}
-		
-		for(int i=0;i<N;i++) {
+
+		for (int i = 0; i < N; i++) {
 			if (!visited[i]) {
 				selected[depth] = arr[i];
 				visited[i] = true;
-				dfs(depth+1);
+				dfs(depth + 1);
 				visited[i] = false;
 			}
 		}
 	}
-
 
 }
