@@ -15,11 +15,12 @@ public class Main {
 			StringTokenizer st = new StringTokenizer(br.readLine());
 			int A = Integer.parseInt(st.nextToken());
 			int B = Integer.parseInt(st.nextToken());
-			long ans = A * B / gcd(A,B);
+			long ans = ((long)A) * B / gcd(A, B);
 			System.out.println(ans);
 		}
 
-
+	}
+	
 	static long gcd(long a, long b) {
 		if (a < b) {
 			long temp = a;
@@ -30,9 +31,9 @@ public class Main {
 		if (a % b == 0) {
 			return b;
 		} else {
-			return gcd(b,a%b);
+			return gcd(b, a % b);
 		}
-			
-	}
 
+	}
+	
 }
