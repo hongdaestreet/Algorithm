@@ -1,55 +1,26 @@
 // https://school.programmers.co.kr/learn/courses/30/lessons/43165
 class Solution {
-    static int count;
-    static int depth;
-    public int solution(int[] nums, int target) {
-        count = 0;
-        depth = nums.length;
-        
-        boolean[] visited = new boolean[depth];
-        
-        dfs(nums,visited,target,0);
+    static int N;
+    static int answer;
+    
+    public int solution(int[] numbers, int target) {
+        N = numbers.length;
+        answer = 0;
+        dfs(0,0,numbers, target);
         
         
-        return count;
+        return answer;
     }
     
-    // visited 필요없을듯?
-    static void dfs(int[] nums, boolean[] visited, int target, int idx){
-        if (idx > depth){
+    static void dfs(int idx,int total,int[] numbers,int target) {
+        if (idx == N) {
+            if (total == target)
+                answer++;
             return;
         }
         
-        check(nums, target);
-        
-        for(int i=idx;i<depth;i++){
-            if (!visited[i]){
-                nums[i] *= -1;
-                visited[i] = true;
-                dfs(nums,visited,target,i+1);
-                nums[i] *= -1;
-                visited[i] = false;
-            }
-                
-        }
-        // dfs(nums,visited,target,idx+1);
-        
-    }
-    
-    static void check(int[] nums, int target){
-        int sum = 0;
-        for(int n : nums){
-            // System.out.print(n+" ");
-            sum+=n;
-        }
-        // System.out.println();
-        if (sum == target){
-            for(int n : nums){
-                // System.out.print(n+" ");
-            }
-            // System.out.println();
-            count++;
-        } 
+        dfs(idx+1,total+numbers[idx],numbers,target);
+        dfs(idx+1,total-numbers[idx],numbers,target);
     }
     
 }
