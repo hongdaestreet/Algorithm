@@ -6,12 +6,8 @@ import java.util.*;
 class Solution {
     static int N;
     static int M;
-    static List<List<int[]>> blanks;
-    static List<List<int[]>> blocks;
-    static boolean[][] boardVisited;
-    static boolean[][] tableVisited;
-    static int[] dr;
-    static int[] dc;
+    static final int[] dr = {1,-1,0,0};
+    static final int[] dc = {0,0,1,-1};
     
     public int solution(int[][] game_board, int[][] table) {
         int answer = 0;
@@ -19,151 +15,105 @@ class Solution {
         N = table.length;
         M = table[0].length;
         
-        blanks = new ArrayList<>();
-        blocks = new ArrayList<>();
+        List<List<int[]>> blanks = new ArrayList<>();
+        List<List<int[]>> blocks = new ArrayList<>();
         
-        dr = new int[]{1,-1,0,0};
-        dc = new int[]{0,0,1,-1};
+        boolean[][] boardVisited = new boolean[N][M];
+        boolean[][] tableVisited = new boolean[N][M];
         
-        boardVisited = new boolean[N][M];
-        tableVisited = new boolean[N][M];
-        
-        
-        for(int i=0;i<N;i++) {
-            for(int j=0;j<M;j++) {
-                if (table[i][j] == 1 && !tableVisited[i][j]) {
-                    blockBFS(i,j,table);
+        for (int r=0;r<N;r++) {
+            for (int c=0;c<M;c++) {
+                if (table[r][c] == 1 && !tableVisited[r][c]) {
+                    blocks.add(BFS(table,tableVisited,r,c,1));
                 }
-                if (game_board[i][j] == 0 && !boardVisited[i][j]) {
-                    blankBFS(i,j,game_board);
+                if (game_board[r][c] == 0 && !boardVisited[r][c]) {
+                    blanks.add(BFS(game_board, boardVisited,r,c,0));
                 }
             }
         }
         
         boolean[] used = new boolean[blocks.size()];
         
-        for (int i=0;i<blanks.size();i++) {
-            List<int[]> blank = blanks.get(i);
-            loop: for(int j=0;j<blocks.size();j++) {
-                List<int[]> block = blocks.get(j);
-                if (blank.size() != block.size() || used[j]) {
-                    continue;
+        for (List<int[]> blank : blanks) {
+            for(int i=0;i<blocks.size();i++) {
+                if (used[i]) continue;
+                
+                List<int[]> block = blocks.get(i);
+                if (blank.size() != block.size()) continue;
+                
+                if (canMatch(blank,block)) {
+                    used[i] = true;
+                    answer += block.size();
+                    break;  // 다음 blank로 이동
                 }
-                for (int r=0;r<4;r++) {
-                    boolean valid = true;
-                    for(int k=0;k<block.size();k++) {
-                        if (blank.get(k)[0] != block.get(k)[0] || blank.get(k)[1] != block.get(k)[1]) {
-                            valid = false;
-                            break;
-                        }
-                    }
-                    if (valid) {
-                        used[j] = true;
-                        answer += block.size();
-                        break loop;
-                    }
-                    block = rotate(block);
-                }
-
             }
-        }
-        
+        } 
         
         return answer;
     }
     
-    
+    // target: 1 - block, 0 - blank
+    static List<int[]> BFS(int[][] board, boolean[][] visited, int sr, int sc, int target) {
+        List<int[]> shape = new ArrayList<>();
+        
+        Queue<int[]> q = new ArrayDeque<>();
+        
+        visited[sr][sc] = true;
+        q.offer(new int[]{sr,sc});
+        
+        while(!q.isEmpty()) {
+            int[] cur = q.poll();
+            int r = cur[0];
+            int c = cur[1];
+            
+            shape.add(new int[]{r,c});
+            
+            for(int i=0;i<4;i++) {
+                int nr = r+dr[i];
+                int nc = c+dc[i];
+                
+                if (!check(nr,nc) || visited[nr][nc] || board[nr][nc] != target) continue;
+                
+                visited[nr][nc] = true;
+                q.offer(new int[]{nr,nc});
+            }
+        }
+        
+        return normalize(shape);
+    }
     
 
     static boolean check(int r,int c) {
-        if (r<0 || r>=N || c<0 || c>=M) {
-            return false;
-        }
-        return true;
+        return r >= 0 && r < N && c >= 0 && c < N;
     }
     
     
-    static void blockBFS(int r,int c, int[][] table) {
-        List<int[]> block = new ArrayList<>();
-        Queue<int[]> q = new LinkedList<>();
+    // 90도 회전 경우의 수 포함해서 같은지 비교
+    static boolean canMatch(List<int[]> blank, List<int[]> block) {
+        List<int[]> curBlock = block;
         
-        block.add(new int[]{r,c});
-        q.offer(new int[]{r,c});
-        tableVisited[r][c] = true;
-        
-        while(!q.isEmpty()) {
-            int[] curr = q.poll();
-            int curR = curr[0];
-            int curC = curr[1];
-            
-            for(int i=0;i<4;i++) {
-                int nr = curR + dr[i];
-                int nc = curC + dc[i];
-                if (!check(nr,nc)) {
-                    continue;
-                }
-                if (table[nr][nc] == 1 && !tableVisited[nr][nc]) {
-                    q.offer(new int[]{nr,nc});
-                    tableVisited[nr][nc] = true;
-                    block.add(new int[]{nr,nc});
-                }
+        for(int i=0;i<4;i++) {
+            if (same(blank,curBlock)) {
+                return true;
             }
+            
+            curBlock = rotate(curBlock);
         }
-        
-        List<int[]> normalBlock = new ArrayList<>(normalize(block));
-        
-        blocks.add(normalBlock);
-        
+        return false;
     }
     
-
-    static void blankBFS(int r,int c, int[][] game_board) {
-        List<int[]> blank = new ArrayList<>();
-        Queue<int[]> q = new LinkedList<>();
-        
-        blank.add(new int[]{r,c});
-        q.offer(new int[]{r,c});
-        boardVisited[r][c] = true;
-        
-        while(!q.isEmpty()) {
-            int[] curr = q.poll();
-            int curR = curr[0];
-            int curC = curr[1];
-            
-            for(int i=0;i<4;i++) {
-                int nr = curR + dr[i];
-                int nc = curC + dc[i];
-                if (!check(nr,nc)) {
-                    continue;
-                }
-                if (game_board[nr][nc] == 0 && !boardVisited[nr][nc]) {
-                    q.offer(new int[]{nr,nc});
-                    boardVisited[nr][nc] = true;
-                    blank.add(new int[]{nr,nc});
-                }
-            }
-        }
-        
-        List<int[]> normalBlank = new ArrayList<>(normalize(blank));
-        
-        blanks.add(normalBlank);
-        
-    }
     
     // 90도 회전
     static List<int[]> rotate(List<int[]> block) {
-        int size = block.size();
         List<int[]> block90 = new ArrayList<>();
-        for(int i=0;i<size;i++) {
-            int curR = block.get(i)[0];
-            int curC = block.get(i)[1];
-            
-            block90.add(new int[]{curC,-curR});
+        
+        for (int[] b : block) {
+            int r = b[0];
+            int c = b[1];
+            block90.add(new int[]{c,-r});
         }
         
-        List<int[]> normalBlock90 = new ArrayList<>(normalize(block90));
-        
-        return normalBlock90;
+        return normalize(block90);
     }
     
     // 왼쪽 최상단 기준으로 정규화 진행
@@ -187,6 +137,17 @@ class Solution {
             return a[0]-b[0];
         });
         return normal;
+    }
+    
+    // 두 도형 같은지 비교
+    static boolean same(List<int[]> a, List<int[]> b) {
+        if (a.size() != b.size()) return false;
+        
+        for (int i=0;i<a.size();i++) {
+            if (a.get(i)[0] != b.get(i)[0]) return false;
+            if (a.get(i)[1] != b.get(i)[1]) return false;
+        }
+        return true;
     }
 
     
