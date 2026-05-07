@@ -1,4 +1,5 @@
 // https://school.programmers.co.kr/learn/courses/30/lessons/42883
+// 35M
 
 import java.util.*;
 
@@ -16,15 +17,16 @@ class Solution {
         int count = 0;
         
         for(int i=0;i<N-1;i++) {
-            System.out.println(i+" 인덱스 시작");
+            // System.out.println(i+" 인덱스 시작");
             int maxIdx = i;
-            for(int j=1; j<=k-count && i+j < N-1;j++) {
+            for(int j=1; j<=k-count && i+j < N;j++) {
+                // System.out.println(maxIdx+" 인덱스 앞까지 삭제 값: "+num[maxIdx]);
                 if (num[maxIdx] < num[i+j]) {
                     maxIdx = i+j;
                 }
             }
             if (maxIdx != i) {
-            System.out.println(maxIdx+" 인덱스 앞까지 삭제 값: "+num[maxIdx]);
+            // System.out.println(maxIdx+" 인덱스 앞까지 삭제 값: "+num[maxIdx]);
                 for (int j=i;j<maxIdx;j++) {
                     trash[j] = true;
                     count++;
