@@ -1,36 +1,36 @@
 // https://school.programmers.co.kr/learn/courses/30/lessons/42898
-// 소요시간: 1H
-// 경로 더하기 로직 - 무조건 DP쓰자…
-
-import java.util.*;
+// 28M / AI(SUPPORT)
+// 1.초기설정도 주의하면서 설정하자
 
 class Solution {
-    static final int MOD = 1000000007;
     public int solution(int m, int n, int[][] puddles) {
-        long cnt = 0;
-        long[][] map = new long[m+1][n+1];
-        for(int i=1;i<m+1;i++){
-            for(int j=1;j<n+1;j++){
-                map[i][j] = 1;
+        int answer = 0;
+        int[][] graph = new int[m][n];
+        for(int i=0;i<puddles.length;i++) {
+            graph[puddles[i][0]-1][puddles[i][1]-1] = -1;
+        }
+        graph[0][0] = 1;
+        for(int i=1;i<Math.max(m,n);i++) {
+            if (i<m && graph[i][0] == 0) { // 초기 설정을 잘못함.
+                graph[i][0] += Math.max(graph[i-1][0],0);
+            }
+            if (i<n && graph[0][i] == 0) {
+                graph[0][i] += Math.max(graph[0][i-1],0);
             }
         }
         
-        for(int i=0;i<puddles.length;i++){
-            map[puddles[i][0]][puddles[i][1]] = 0;
-        }
-        
-        for(int i=1;i<m+1;i++){
-            for(int j=1;j<n+1;j++){
-                if (map[i][j] == 0){
+        for(int i=1;i<m;i++) {
+            // System.out.println();
+            for(int j=1;j<n;j++) {
+                if (graph[i][j] == -1) {
+                    // System.out.print(graph[i][j]+" ");
                     continue;
                 }
-                if (!(i==1 && j==1))
-                map[i][j] = (map[i-1][j]+map[i][j-1])%MOD;
+                graph[i][j] = (Math.max(graph[i-1][j],0) + Math.max(graph[i][j-1],0))%1_000_000_007;
+                // System.out.print(graph[i][j]+" ");
             }
         }
         
-        
-        int ans = (int) (map[m][n] % MOD);
-        return ans;
+        return graph[m-1][n-1];
     }
 }
